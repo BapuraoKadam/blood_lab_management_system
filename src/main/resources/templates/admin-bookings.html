@@ -4,11 +4,20 @@
     <meta charset="UTF-8">
     <title>Manage Bookings - Admin Panel</title>
 
+    <!-- 📱 Mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <!-- Bootstrap JS (IMPORTANT) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -17,17 +26,17 @@
         }
 
         .navbar {
-            background-color: #0d6efd;
+            background: linear-gradient(90deg, #0d6efd, #3a8bfd);
         }
 
         .navbar-brand {
             color: white !important;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .card {
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
 
         .table th {
@@ -36,22 +45,18 @@
         }
 
         .status-badge {
-            padding: 5px 10px;
-            border-radius: 10px;
+            padding: 6px 12px;
+            border-radius: 12px;
             color: white;
             font-size: 12px;
         }
 
-        .pending {
-            background-color: orange;
-        }
+        .pending { background-color: orange; }
+        .completed { background-color: green; }
+        .cancelled { background-color: red; }
 
-        .completed {
-            background-color: green;
-        }
-
-        .cancelled {
-            background-color: red;
+        .btn-sm {
+            font-size: 12px;
         }
     </style>
 </head>
@@ -60,76 +65,108 @@
 
 <!-- 🔷 Navbar -->
 <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-        <span class="navbar-brand">Admin Panel - Manage Bookings</span>
+    <div class="container-fluid px-4">
 
-        <div class="ms-auto">
-            <a href="/admin/dashboard" class="btn btn-light btn-sm me-2">Dashboard</a>
-            <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+        <span class="navbar-brand">
+            <i class="bi bi-clipboard-check"></i> Manage Bookings
+        </span>
+
+        <!-- Toggle -->
+        <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navBar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menu -->
+        <div class="collapse navbar-collapse" id="navBar">
+            <div class="ms-auto mt-2 mt-lg-0">
+                <a href="/admin/dashboard" class="btn btn-light btn-sm me-2">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/admin/logout" class="btn btn-danger btn-sm">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
         </div>
+
     </div>
 </nav>
 
-<!-- 🔷 Main Content -->
+<!-- 🔷 Content -->
 <div class="container mt-5">
 
     <div class="card p-4">
 
-        <h4 class="mb-3">All Bookings</h4>
+        <h4 class="mb-3 fw-semibold">All Bookings</h4>
+
+        <!-- Success -->
+        <p th:if="${param.success}" th:text="${param.success}" class="text-success"></p>
 
         <div class="table-responsive">
-            <table class="table table-bordered table-hover text-center align-middle">
+       <table class="table table-bordered table-hover text-center align-middle">
 
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Patient</th>
-                        <th>Test</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Patient</th>
+            <th>Mobile</th>
+            <th>Address</th>
+            <th>Test</th>
+            <th>Booking Date</th>      <!-- ✅ NEW -->
+            <th>Preferred Date</th>    <!-- ✅ NEW -->
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
 
-                <tbody>
-                    <tr th:each="b : ${bookings}">
-                        <td th:text="${b.id}"></td>
-                        <td th:text="${b.patientName}"></td>
-                        <td th:text="${b.testName}"></td>
-                        <td th:text="${b.date}"></td>
+    <tbody>
+        <tr th:each="b : ${bookings}">
+            <td th:text="${b.id}"></td>
+            <td th:text="${b.patientName}"></td>
 
-                        <!-- Status Badge -->
-                        <td>
-                            <span th:text="${b.status}"
-                                  th:classappend="
-                                  ${b.status == 'Pending'} ? 'status-badge pending' :
-                                  (${b.status == 'Completed'} ? 'status-badge completed' :
-                                  'status-badge cancelled')">
-                            </span>
-                        </td>
+            <td th:text="${b.mobile}"></td>
+            <td th:text="${b.address}"></td>
 
-                        <!-- Actions -->
-                        <td>
-                            <a th:href="@{'/admin/report/' + ${b.id}}"
-                               class="btn btn-primary btn-sm mb-1">
-                                Upload Report
-                            </a>
+            <td th:text="${b.testName}"></td>
 
-                            <!-- Optional: Mark Completed -->
-                            <a th:href="@{'/admin/complete/' + ${b.id}}"
-                               class="btn btn-success btn-sm">
-                                Mark Completed
-                            </a>
-                        </td>
-                    </tr>
+            <!-- ✅ FIXED DATE -->
+            <td th:text="${#temporals.format(b.bookingDate, 'dd MMM yyyy')}"></td>
 
-                    <!-- No Data -->
-                    <tr th:if="${#lists.isEmpty(bookings)}">
-                        <td colspan="6" class="text-danger">No bookings found</td>
-                    </tr>
-                </tbody>
+            <!-- ✅ FIXED DATE -->
+            <td th:text="${#temporals.format(b.preferredDate, 'dd MMM yyyy')}"></td>
 
-            </table>
+            <td>
+                <span th:text="${b.status}"
+                      th:classappend="
+                      ${b.status == 'Booked'} ? 'status-badge pending' :
+                      (${b.status == 'Report Ready'} ? 'status-badge completed' :
+                      'status-badge cancelled')">
+                </span>
+            </td>
+
+            <td>
+                <a th:href="@{'/admin/report/' + ${b.id}}"
+                   class="btn btn-primary btn-sm mb-1">
+                    <i class="bi bi-upload"></i>
+                </a>
+
+                <a th:href="@{'/admin/edit-report/' + ${b.id}}"
+                   class="btn btn-warning btn-sm mb-1">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+
+                <a th:href="@{'/report/pdf/' + ${b.id}}"
+                   class="btn btn-success btn-sm mb-1">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                </a>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(bookings)}">
+            <td colspan="9" class="text-danger">No bookings found</td> <!-- ✅ UPDATED -->
+        </tr>
+    </tbody>
+
+</table>
         </div>
 
     </div>

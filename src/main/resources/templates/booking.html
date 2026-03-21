@@ -19,15 +19,6 @@
             background: linear-gradient(to right, #eef2f3, #dfe9f3);
         }
 
-        .navbar {
-            background-color: #0d6efd;
-        }
-
-        .navbar-brand {
-            color: white !important;
-            font-weight: 600;
-        }
-
         .card {
             border-radius: 20px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
@@ -53,19 +44,9 @@
 
 <body>
 
-<!-- 🔷 Navbar -->
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-        <span class="navbar-brand"><i class="fa-solid fa-vial"></i> Blood Lab System</span>
+<!-- Navbar -->
+<div th:replace="fragments :: navbar"></div>
 
-        <div class="ms-auto">
-            <a href="/tests" class="btn btn-light btn-sm me-2">Back</a>
-            <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
-        </div>
-    </div>
-</nav>
-
-<!-- 🔷 Main Content -->
 <div class="container mt-5">
 
     <div class="col-md-6 mx-auto">
@@ -75,19 +56,12 @@
                 <i class="fa-solid fa-calendar-check"></i> Book Blood Test
             </h4>
 
-            <!-- Info Message -->
             <div class="info-box mb-3 text-center">
                 Please confirm your details before booking the test.
             </div>
 
-            <form action="/book" method="post">
-
-                <!-- Patient Name -->
-                <div class="mb-3">
-                    <label class="form-label">Patient Name</label>
-                    <input type="text" name="patientName" class="form-control"
-                           placeholder="Enter patient name" required>
-                </div>
+            <!-- FORM -->
+            <form th:action="@{/book}" method="post">
 
                 <!-- Test Name -->
                 <div class="mb-3">
@@ -96,14 +70,28 @@
                            th:value="${test.testName}" readonly>
                 </div>
 
-                <!-- Hidden Test ID -->
-                <input type="hidden" name="testId" th:value="${test.id}">
+                <!-- Mobile -->
+                <div class="mb-3">
+                    <label class="form-label">Mobile Number</label>
+                    <input type="text" name="mobile" class="form-control"
+                           pattern="[0-9]{10}" placeholder="Enter 10-digit mobile" required>
+                </div>
 
-                <!-- Optional Date -->
+                <!-- Address -->
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-control"
+                              placeholder="Enter full address" required></textarea>
+                </div>
+
+                <!-- ✅ FIXED: Preferred Date -->
                 <div class="mb-3">
                     <label class="form-label">Preferred Date</label>
-                    <input type="date" name="date" class="form-control">
+                    <input type="date" name="preferredDate" class="form-control" required>
                 </div>
+
+                <!-- Hidden Test ID -->
+                <input type="hidden" name="testId" th:value="${test.id}">
 
                 <!-- Submit -->
                 <div class="d-grid">
@@ -118,6 +106,9 @@
     </div>
 
 </div>
+
+<!-- Footer -->
+<div th:replace="fragments :: footer"></div>
 
 </body>
 </html>

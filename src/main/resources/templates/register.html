@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Register - Blood Lab System</title>
@@ -14,16 +14,19 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(to right, #e3f2fd, #ffffff);
-            height: 100vh;
         }
 
-        .register-container {
-            height: 100vh;
+        .form-container {
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .card {
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            padding: 30px;
         }
 
         .form-control {
@@ -45,20 +48,24 @@
             font-weight: 600;
             color: #0d6efd;
         }
-
-        .link {
-            text-decoration: none;
-        }
     </style>
 </head>
 
 <body>
 
-<div class="container d-flex justify-content-center align-items-center register-container">
+<!-- ✅ Navbar -->
+<div th:replace="fragments :: navbar"></div>
+
+<!-- 🔷 Form -->
+<div class="form-container">
     <div class="col-md-5">
-        <div class="card p-4">
+        <div class="card">
 
             <h3 class="text-center title mb-4">Patient Registration</h3>
+
+            <!-- ✅ Messages -->
+            <p class="text-success text-center" th:if="${msg}" th:text="${msg}"></p>
+            <p class="text-danger text-center" th:if="${error}" th:text="${error}"></p>
 
             <form action="/register" method="post">
 
@@ -101,7 +108,7 @@
 
             <!-- Login Link -->
             <div class="text-center mt-3">
-                <a href="/login" class="link">
+                <a href="/login">
                     Already have an account? Login
                 </a>
             </div>
@@ -109,6 +116,9 @@
         </div>
     </div>
 </div>
+
+<!-- ✅ Footer -->
+<div th:replace="fragments :: footer"></div>
 
 </body>
 </html>

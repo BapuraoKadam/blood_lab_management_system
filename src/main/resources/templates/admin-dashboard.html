@@ -1,33 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard - Blood Lab System</title>
+    <title>Admin Dashboard</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f4f6f9;
+        body { font-family: 'Poppins', sans-serif; }
+
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0d6efd, #3a8bfd);
+            color: white;
+            padding: 20px;
         }
 
-        .navbar {
-            background-color: #0d6efd;
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 10px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.3s;
         }
 
-        .navbar-brand {
-            color: white !important;
-            font-weight: 500;
+        .sidebar a:hover {
+            background: rgba(255,255,255,0.2);
         }
+
+        .content { padding: 20px; }
 
         .card {
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: 0.3s;
         }
 
@@ -35,73 +49,235 @@
             transform: translateY(-5px);
         }
 
-        .card-title {
-            font-weight: 600;
-            color: #0d6efd;
+        .dark-mode {
+            background: #121212;
+            color: white;
         }
 
-        .btn-custom {
-            border-radius: 10px;
+        @media(max-width:768px){
+            .sidebar { min-height: auto; }
+        }
+
+        /* Notification */
+        .notif-dropdown {
+            display:none;
+            position:absolute;
+            right:0;
+            width:300px;
+            max-height:300px;
+            overflow:auto;
+            z-index:999;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(0); }
+            25% { transform: rotate(15deg); }
+            50% { transform: rotate(-15deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0); }
+        }
+
+        .bell-animate {
+            animation: shake 0.5s ease;
         }
     </style>
 </head>
 
 <body>
 
-<!-- 🔷 Navbar -->
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-        <span class="navbar-brand">Admin Panel - Blood Lab System</span>
+<div class="container-fluid">
+<div class="row">
 
-        <div class="ms-auto">
-            <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+<!-- Sidebar -->
+<div class="col-md-2 sidebar">
+    <h4>Admin</h4>
+
+    <a href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/admin/tests"><i class="bi bi-list"></i> Manage Tests</a>
+    <a href="/admin/add-test"><i class="bi bi-plus-circle"></i> Add Test</a>
+    <a href="/admin/bookings"><i class="bi bi-clipboard"></i> Bookings</a>
+    <a href="/admin/analytics"><i class="bi bi-bar-chart"></i> Analytics</a>
+
+    <hr>
+
+    <button onclick="toggleDark()" class="btn btn-light btn-sm mb-2">
+        🌙 Dark Mode
+    </button>
+
+    <a href="/admin/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+</div>
+
+<!-- Content -->
+<div class="col-md-10 content">
+
+    <!-- Top Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Dashboard Overview</h3>
+
+        <div class="position-relative">
+            <i class="bi bi-bell fs-4" onclick="toggleDropdown()" style="cursor:pointer;"></i>
+
+            <span id="notifCount"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                0
+            </span>
+
+            <div id="notifDropdown" class="notif-dropdown bg-white border rounded p-2">
+                <h6>Notifications</h6>
+                <ul id="notifList" class="list-group mb-2"></ul>
+
+                <button class="btn btn-sm btn-primary w-100" onclick="markRead()">
+                    Mark all as read
+                </button>
+            </div>
         </div>
     </div>
-</nav>
 
-<!-- 🔷 Main Content -->
-<div class="container mt-5">
+    <!-- Cards -->
+    <div class="row mt-3">
 
-    <h3 class="mb-4">Welcome Admin 👨‍⚕️</h3>
-
-    <div class="row">
-
-        <!-- Add Test -->
-        <div class="col-md-4 mb-4">
-            <div class="card p-4 text-center">
-                <h5 class="card-title">Add New Test</h5>
-                <p>Create and manage blood test details.</p>
-                <a href="/admin/add-test" class="btn btn-primary btn-custom">
-                    Add Test
-                </a>
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 bg-primary text-white">
+                <h6>Total Bookings</h6>
+                <h3 th:text="${total} ?: 0">0</h3>
             </div>
         </div>
 
-        <!-- View Bookings -->
-        <div class="col-md-4 mb-4">
-            <div class="card p-4 text-center">
-                <h5 class="card-title">Manage Bookings</h5>
-                <p>View and update patient bookings.</p>
-                <a href="/admin/bookings" class="btn btn-success btn-custom">
-                    View Bookings
-                </a>
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 bg-success text-white">
+                <h6>Completed</h6>
+                <h3 th:text="${completed} ?: 0">0</h3>
             </div>
         </div>
 
-        <!-- Analytics -->
-        <div class="col-md-4 mb-4">
-            <div class="card p-4 text-center">
-                <h5 class="card-title">Analytics</h5>
-                <p>View reports and system statistics.</p>
-                <a href="/admin/analytics" class="btn btn-warning btn-custom">
-                    View Analytics
-                </a>
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 bg-warning text-dark">
+                <h6>Pending</h6>
+                <h3 th:text="${pending} ?: 0">0</h3>
             </div>
         </div>
 
     </div>
+
+    <!-- Chart -->
+<div class="card p-4 mt-4 text-center">
+    <h5 class="mb-3">Bookings Overview</h5>
+
+    <div style="max-width: 400px; margin: auto;">
+        <canvas id="homeChart"></canvas>
+    </div>
+</div>
 
 </div>
+</div>
+</div>
+
+<!-- Scripts -->
+<script th:inline="javascript">
+
+// Dark mode
+function toggleDark() {
+    document.body.classList.toggle("dark-mode");
+}
+
+// Chart
+let completed = /*[[${completed}]]*/ 0 || 0;
+let pending = /*[[${pending}]]*/ 0 || 0;
+
+const ctx = document.getElementById('homeChart');
+
+if (ctx) {
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Pending'],
+            datasets: [{
+                data: [completed, pending],
+                backgroundColor: ['#28a745', '#ff9800']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // 🔥 Important
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+}
+
+// Notifications
+let lastCount = 0;
+let userInteracted = false;
+
+document.addEventListener("click", () => userInteracted = true);
+
+function loadNotifications() {
+    fetch('/admin/notifications')
+        .then(res => res.json())
+        .then(data => {
+
+            const list = document.getElementById("notifList");
+            const count = document.getElementById("notifCount");
+            const bell = document.querySelector(".bi-bell");
+            const sound = document.getElementById("notifSound");
+
+            if (!list || !count) return;
+
+            list.innerHTML = "";
+            count.innerText = data.length;
+
+            // Only trigger when new notification arrives
+            if (data.length > lastCount) {
+
+                // Play sound safely
+                if (sound && userInteracted) {
+                    sound.currentTime = 0;
+                    sound.play().catch(() => {});
+                }
+
+                // Bell animation
+                if (bell) {
+                    bell.classList.add("bell-animate");
+                    setTimeout(() => bell.classList.remove("bell-animate"), 500);
+                }
+            }
+
+            lastCount = data.length;
+
+            data.forEach(n => {
+                let li = document.createElement("li");
+                li.className = "list-group-item";
+                li.innerText = n.message;
+                list.appendChild(li);
+            });
+        })
+        .catch(err => console.log("Notification error:", err));
+}
+
+// Auto refresh
+setInterval(loadNotifications, 5000);
+loadNotifications();
+
+function toggleDropdown() {
+    const d = document.getElementById("notifDropdown");
+    if (d) {
+        d.style.display = d.style.display === "block" ? "none" : "block";
+    }
+}
+
+function markRead() {
+    fetch('/admin/notifications/read', { method: 'POST' })
+        .then(() => loadNotifications());
+}
+
+</script>
+
+<audio id="notifSound" preload="auto">
+    <source src="/sound/notification.mp3" type="audio/mpeg">
+</audio>
 
 </body>
 </html>

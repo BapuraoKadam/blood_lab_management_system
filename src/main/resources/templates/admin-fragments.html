@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="adminSidebar(activePage)">
+
+    <div class="col-md-2 col-sm-12 sidebar">
+        <h4>Admin</h4>
+
+        <a th:href="@{/admin/dashboard}"
+           th:classappend="${activePage == 'dashboard'} ? 'bg-white text-dark'">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+
+        <a th:href="@{/admin/tests}"
+           th:classappend="${activePage == 'tests'} ? 'bg-white text-dark'">
+            <i class="bi bi-list"></i> Manage Tests
+        </a>
+
+        <a th:href="@{/admin/bookings}"
+           th:classappend="${activePage == 'bookings'} ? 'bg-white text-dark'">
+            <i class="bi bi-clipboard"></i> Bookings
+        </a>
+
+        <a th:href="@{/admin/analytics}"
+           th:classappend="${activePage == 'analytics'} ? 'bg-white text-dark'">
+            <i class="bi bi-bar-chart"></i> Analytics
+        </a>
+
+        <hr>
+
+        <button onclick="toggleDark()" class="btn btn-light btn-sm mb-2">
+            🌙 Dark Mode
+        </button>
+
+        <a th:href="@{/logout}">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

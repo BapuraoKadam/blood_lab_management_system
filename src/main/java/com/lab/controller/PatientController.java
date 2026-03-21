@@ -61,4 +61,34 @@ public class PatientController {
         session.invalidate();
         return "login";
     }
+    
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String resetPassword(@RequestParam String email,
+                                @RequestParam String newPassword,
+                                @RequestParam String confirmPassword,
+                                Model model) {
+
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "Passwords do not match!");
+            return "forgot-password";
+        }
+
+        Patient p = repo.findByEmail(email);
+
+        if (p != null) {
+            p.setPassword(newPassword);
+            repo.save(p);
+
+            model.addAttribute("msg", "Password updated successfully. Please login.");
+            return "login";
+        } else {
+            model.addAttribute("error", "Email not found!");
+            return "forgot-password";
+        }
+    }
 }

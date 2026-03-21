@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>My Bookings - Blood Lab System</title>
+    <title>My Bookings - Health Lab</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,18 +16,17 @@
             background-color: #f4f6f9;
         }
 
-        .navbar {
-            background-color: #0d6efd;
-        }
-
-        .navbar-brand {
-            color: white !important;
-            font-weight: 500;
+        .page-header {
+            background: linear-gradient(135deg, #0d6efd, #00c6ff);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
 
         .card {
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
 
         .table th {
@@ -36,96 +35,112 @@
         }
 
         .status-badge {
-            padding: 5px 10px;
-            border-radius: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
             color: white;
             font-size: 12px;
+            font-weight: 500;
         }
 
-        .status-pending { background-color: orange; }
-        .status-completed { background-color: green; }
-        .status-cancelled { background-color: red; }
+        .status-pending { background-color: #ffc107; color: black; }
+        .status-completed { background-color: #28a745; }
+        .status-cancelled { background-color: #dc3545; }
+
+        .empty-box {
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+        }
     </style>
 </head>
 
 <body>
 
-<!-- 🔷 Navbar -->
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-        <span class="navbar-brand">Blood Lab System</span>
+<!-- 🔹 Navbar -->
+<div th:replace="fragments :: navbar"></div>
 
-        <div class="ms-auto">
-            <a href="/dashboard" class="btn btn-light btn-sm me-2">Dashboard</a>
-            <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
-        </div>
+<div class="container mt-4">
+
+    <!-- 🔷 Page Header -->
+    <div class="page-header">
+        <h3>My Bookings</h3>
+        <p class="mb-0">View your test bookings and reports</p>
     </div>
-</nav>
 
-<!-- 🔷 Main Content -->
-<div class="container mt-5">
-
+    <!-- 🔷 Card -->
     <div class="card p-4">
 
-        <h4 class="mb-3">My Bookings</h4>
-
         <div class="table-responsive">
-            <table class="table table-bordered table-hover text-center align-middle">
 
-                <thead>
-                    <tr>
-                        <th>Test</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Report</th>
-                    </tr>
-                </thead>
+       <table class="table table-hover text-center align-middle">
 
-                <tbody>
-                    <tr th:each="b : ${bookings}">
-                        <td th:text="${b.testName}"></td>
-                        <td th:text="${b.date}"></td>
+    <thead>
+        <tr>
+            <th>Test Name</th>
+            <th>Booking Date</th>      <!-- ✅ NEW -->
+            <th>Preferred Date</th>    <!-- ✅ NEW -->
+            <th>Status</th>
+            <th>Report</th>
+        </tr>
+    </thead>
 
-                        <!-- ✅ Status Badge -->
-                        <td>
-                            <span th:text="${b.status}"
-                                  th:classappend="
-                                  ${b.status == 'Pending'} ? 'status-badge status-pending' :
-                                  (${b.status == 'Completed'} ? 'status-badge status-completed' :
-                                  (${b.status == 'Report Ready'} ? 'status-badge status-completed' :
-                                  'status-badge status-cancelled'))">
-                            </span>
-                        </td>
+    <tbody>
 
-                        <!-- ✅ FIXED REPORT BUTTON -->
-                        <td>
-                            <!-- Show button ONLY if report is ready -->
-                            <a th:if="${b.status == 'Report Ready'}"
-                               th:href="@{'/report/' + ${b.id}}"
-                               class="btn btn-primary btn-sm">
-                                View Report
-                            </a>
+        <!-- 🔁 Booking Loop -->
+        <tr th:each="b : ${bookings}">
+            <td th:text="${b.testName}"></td>
 
-                            <!-- Show message if not ready -->
-                            <span th:if="${b.status != 'Report Ready'}"
-                                  class="text-muted">
-                                Not Ready
-                            </span>
-                        </td>
-                    </tr>
+            <!-- ✅ FIXED -->
+            <td th:text="${#temporals.format(b.bookingDate, 'dd MMM yyyy')}"></td>
 
-                    <!-- No Data -->
-                    <tr th:if="${#lists.isEmpty(bookings)}">
-                        <td colspan="4" class="text-danger">No bookings found</td>
-                    </tr>
-                </tbody>
+            <!-- ✅ FIXED -->
+            <td th:text="${#temporals.format(b.preferredDate, 'dd MMM yyyy')}"></td>
 
-            </table>
+            <!-- ✅ Status Badge -->
+            <td>
+                <span th:text="${b.status}"
+                      th:classappend="
+                      ${b.status == 'Booked'} ? 'status-badge status-pending' :
+                      (${b.status == 'Completed'} ? 'status-badge status-completed' :
+                      (${b.status == 'Report Ready'} ? 'status-badge status-completed' :
+                      'status-badge status-cancelled'))">
+                </span>
+            </td>
+
+            <!-- ✅ Report Button -->
+            <td>
+                <a th:if="${b.status == 'Report Ready'}"
+                   th:href="@{'/report/' + ${b.id}}"
+                   class="btn btn-success btn-sm">
+                    Download
+                </a>
+
+                <span th:if="${b.status != 'Report Ready'}"
+                      class="text-muted">
+                    Not Ready
+                </span>
+            </td>
+        </tr>
+
+    </tbody>
+
+</table>
+
+            <!-- ❌ Empty State -->
+            <div th:if="${#lists.isEmpty(bookings)}" class="empty-box">
+                <h5>No Bookings Found</h5>
+                <p>Start by booking your first test.</p>
+                <a href="/tests" class="btn btn-primary">Book Test</a>
+            </div>
+
         </div>
 
     </div>
 
 </div>
+
+<!-- 🔹 Footer -->
+<div th:replace="fragments :: footer"></div>
 
 </body>
 </html>

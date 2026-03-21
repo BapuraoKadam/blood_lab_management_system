@@ -5,6 +5,7 @@ import com.lab.entity.Patient;
 import com.lab.entity.Test;
 import com.lab.repository.BookingRepository;
 import com.lab.repository.TestRepository;
+import com.lab.service.NotificationService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -23,14 +24,22 @@ public class BookingController {
 
     @Autowired
     private TestRepository testRepo;
+    
+    @Autowired
+    private NotificationService notificationService;
 
-    // Show booking page
+    // 🔐 COMMON METHOD
+    private boolean isAdminLoggedIn(HttpSession session) {
+        return session.getAttribute("admin") != null;
+    }
+
+    // ================= PATIENT: BOOK PAGE =================
     @GetMapping("/book/{id}")
     public String bookPage(@PathVariable Long id,
                            Model model,
                            HttpSession session) {
 
-        // ✅ ADD HERE
+        // 🔒 Patient check
         if (session.getAttribute("loggedInUser") == null) {
             return "redirect:/login";
         }
@@ -40,12 +49,15 @@ public class BookingController {
         return "booking";
     }
 
-    // Save booking
+    // ================= PATIENT: SAVE BOOKING =================
     @PostMapping("/book")
     public String saveBooking(@RequestParam String testName,
+                              @RequestParam String mobile,
+                              @RequestParam String address,
+                              @RequestParam String preferredDate,  // ✅ GET FROM FORM
                               HttpSession session) {
 
-        // ✅ ADD HERE
+        // 🔒 Patient check
         if (session.getAttribute("loggedInUser") == null) {
             return "redirect:/login";
         }
@@ -55,23 +67,45 @@ public class BookingController {
         Booking b = new Booking();
         b.setPatientName(p.getName());
         b.setTestName(testName);
-        b.setDate(LocalDate.now());
+        b.setMobile(mobile);
+        b.setAddress(address);
+
+        // ✅ Convert String → LocalDate
+        b.setPreferredDate(LocalDate.parse(preferredDate));
+
+        // ✅ Set today's date separately
+        b.setBookingDate(LocalDate.now());
+
         b.setStatus("Booked");
 
         bookingRepo.save(b);
 
+        // 🔔 Notification
+        notificationService.createNotification(
+            "New booking: " + p.getName() + " booked " + testName
+        );
+
         return "success";
     }
+
+    // ================= ADMIN: VIEW BOOKINGS =================
     @GetMapping("/admin/bookings")
-    public String viewBookings(Model model) {
+    public String viewBookings(Model model, HttpSession session) {
+
+        // 🔒 ADMIN CHECK (FIXED)
+        if (!isAdminLoggedIn(session)) {
+            return "redirect:/admin/login";
+        }
+
         model.addAttribute("bookings", bookingRepo.findAll());
         return "admin-bookings";
     }
-    
+
+    // ================= PATIENT: MY BOOKINGS =================
     @GetMapping("/my-bookings")
     public String myBookings(Model model, HttpSession session) {
 
-        // ✅ ADD HERE
+        // 🔒 Patient check
         if (session.getAttribute("loggedInUser") == null) {
             return "redirect:/login";
         }
@@ -83,5 +117,4 @@ public class BookingController {
 
         return "my-bookings";
     }
-    
 }

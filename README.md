@@ -81,8 +81,6 @@ Password: admin123
 
 ## 📸 Screenshots
 
-(Add your screenshots in a folder and link here)
-
 ![Home Page](screenshots/home.png)  
 ![Admin Dashboard](screenshots/admin.png)  
 ![Booking Page](screenshots/booking.png)  
